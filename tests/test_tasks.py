@@ -51,3 +51,38 @@ def test_delete_task(client):
     assert resp.status_code == 204
     resp = client.get(f"/tasks/{task_id}")
     assert resp.status_code == 404
+
+
+def test_create_task_missing_title(client):
+    resp = client.post("/tasks", json={"description": "no title here"})
+    assert resp.status_code == 400
+    assert "error" in resp.get_json()
+
+
+def test_create_task_empty_title(client):
+    resp = client.post("/tasks", json={"title": ""})
+    assert resp.status_code == 400
+
+
+def test_create_task_whitespace_title(client):
+    resp = client.post("/tasks", json={"title": "   "})
+    assert resp.status_code == 400
+
+
+def test_create_task_non_string_title(client):
+    resp = client.post("/tasks", json={"title": 123})
+    assert resp.status_code == 400
+
+
+def test_create_task_invalid_json_body(client):
+    resp = client.post(
+        "/tasks", data="not json", content_type="application/json"
+    )
+    assert resp.status_code == 400
+    assert "error" in resp.get_json()
+
+
+def test_create_task_strips_whitespace_from_title(client):
+    resp = client.post("/tasks", json={"title": "  Buy milk  "})
+    assert resp.status_code == 201
+    assert resp.get_json()["title"] == "Buy milk"
