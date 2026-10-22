@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.venv/
+tasks.db
+.pytest_cache/
