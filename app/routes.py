@@ -20,8 +20,15 @@ def get_task(task_id):
 
 @bp.route("/tasks", methods=["POST"])
 def create_task():
-    data = request.get_json()
-    task = storage.create_task(data["title"], data.get("description"))
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "request body must be a JSON object"}), 400
+
+    title = data.get("title")
+    if not isinstance(title, str) or not title.strip():
+        return jsonify({"error": "title is required"}), 400
+
+    task = storage.create_task(title.strip(), data.get("description"))
     return jsonify(task), 201
 
 
